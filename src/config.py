@@ -71,3 +71,13 @@ COUNTRY_COLORS = {
     "Japan": "#ff7f0e",
     "China": "#9467bd",
 }
+
+# Indicators where the raw FRED series is already in % rate (no YoY needed)
+ALREADY_RATE_INDICATORS = {"gdp", "unemployment", "interest_rate"}
+
+# Indicators where FRED series is an index level (YoY % change needed)
+INDEX_LEVEL_INDICATORS = {"cpi"}
+
+# Convenience lists for iteration
+COUNTRIES = list(FRED_SERIES.keys())
+INDICATORS = list(INDICATOR_LABELS.keys())
