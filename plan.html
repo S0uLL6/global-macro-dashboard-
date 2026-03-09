@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Macro Dashboard — Plan</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #222636;
+    --border: #2e3349;
+    --accent: #4f8ef7;
+    --accent2: #7c5cfc;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #8892a4;
+    --text3: #5a6380;
+    --radius: 10px;
+    --week1: #1a2744;
+    --week2: #1a2632;
+    --week3: #251a33;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 20px 80px;
+  }
+
+  .header {
+    max-width: 960px;
+    margin: 0 auto 48px;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4f8ef7, #7c5cfc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .header p {
+    color: var(--text2);
+    font-size: 0.95rem;
+  }
+
+  .progress-bar-wrap {
+    margin: 24px auto 0;
+    max-width: 400px;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f8ef7, #7c5cfc);
+    border-radius: 999px;
+    width: 0%;
+    transition: width 0.6s ease;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* Week banners */
+  .week-section {
+    margin-bottom: 40px;
+  }
+
+  .week-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .week-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+
+  .w1 .week-badge { background: rgba(79,142,247,0.15); color: #4f8ef7; border: 1px solid rgba(79,142,247,0.3); }
+  .w2 .week-badge { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+  .w3 .week-badge { background: rgba(124,92,252,0.15); color: #a78bfa; border: 1px solid rgba(124,92,252,0.3); }
+
+  .week-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text2);
+  }
+
+  .week-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Task cards */
+  .task-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .task-card:hover {
+    border-color: #3a4060;
+  }
+
+  .task-card.done {
+    opacity: 0.55;
+  }
+
+  .task-card.done .task-title {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+
+  .task-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .task-header:hover {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .task-num {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text3);
+    min-width: 28px;
+    letter-spacing: 0.05em;
+  }
+
+  .task-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 2px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .task-checkbox:hover {
+    border-color: var(--accent);
+  }
+
+  .task-checkbox.checked {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .task-checkbox.checked::after {
+    content: '';
+    display: block;
+    width: 5px;
+    height: 8px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .task-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .task-file {
+    font-size: 0.72rem;
+    color: var(--text3);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    background: var(--surface2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .subtask-progress {
+    font-size: 0.72rem;
+    color: var(--text3);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .chevron {
+    color: var(--text3);
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .task-card.open .chevron {
+    transform: rotate(90deg);
+  }
+
+  .subtasks {
+    display: none;
+    padding: 0 16px 14px 58px;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.15);
+  }
+
+  .task-card.open .subtasks {
+    display: block;
+  }
+
+  .subtask {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .subtask:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .subtask-checkbox {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .subtask-checkbox:hover {
+    border-color: var(--accent);
+  }
+
+  .subtask-checkbox.checked {
+    background: rgba(79,142,247,0.3);
+    border-color: var(--accent);
+  }
+
+  .subtask-checkbox.checked::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 6px;
+    border-right: 1.5px solid var(--accent);
+    border-bottom: 1.5px solid var(--accent);
+    transform: rotate(45deg) translateY(-1px);
+  }
+
+  .subtask-text {
+    font-size: 0.83rem;
+    color: var(--text2);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .subtask.done .subtask-text {
+    text-decoration: line-through;
+    color: var(--text3);
+  }
+
+  .subtask-tag {
+    font-size: 0.68rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .tag-code { background: rgba(79,142,247,0.12); color: #6ba3f8; border: 1px solid rgba(79,142,247,0.2); }
+  .tag-test { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+  .tag-config { background: rgba(245,158,11,0.1); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+  .tag-docs { background: rgba(124,92,252,0.12); color: #a78bfa; border: 1px solid rgba(124,92,252,0.2); }
+  .tag-ui { background: rgba(236,72,153,0.1); color: #f472b6; border: 1px solid rgba(236,72,153,0.2); }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-val {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  .stat-sep {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 Global Macro Dashboard</h1>
+  <p>Portfolio project — Economics &amp; Finance · Streamlit · FRED API · World Bank</p>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>Overall progress</span>
+      <span id="progress-text">0 / 25 tasks</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="stat-done">0</div><div class="stat-label">Done</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val">25</div><div class="stat-label">Total tasks</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val">3</div><div class="stat-label">Weeks</div></div>
+    <div class="stat-sep"></div>
+    <div class="stat"><div class="stat-val" id="stat-sub-done">0</div><div class="stat-label">Subtasks done</div></div>
+  </div>
+
+  <!-- ─── WEEK 1 ─── -->
+  <div class="week-section w1">
+    <div class="week-label">
+      <span class="week-badge">Week 1</span>
+      <span class="week-title">Foundation &amp; Data Pipeline</span>
+      <div class="week-line"></div>
+    </div>
+
+    <!-- Task 1 -->
+    <div class="task-card" id="task-1">
+      <div class="task-header" onclick="toggleTask('task-1')">
+        <span class="task-num">#01</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-1')"></div>
+        <span class="task-title">Project skeleton — scaffolding &amp; boilerplate</span>
+        <span class="task-file">root/</span>
+        <span class="subtask-progress" id="sp-task-1">1/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask done" id="sub-task-1-1">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-1-1','task-1')"></div>
+          <span class="subtask-text">Create <code>requirements.txt</code> with pinned versions: streamlit, pandas, plotly, fredapi, wbgapi, python-dotenv, statsmodels, pytest</span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+        <div class="subtask" id="sub-task-1-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-1-2','task-1')"></div>
+          <span class="subtask-text">Create <code>.gitignore</code>: exclude <code>.env</code>, <code>data/cache/*.csv</code>, <code>__pycache__/</code>, <code>*.pyc</code>, <code>.DS_Store</code></span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+        <div class="subtask" id="sub-task-1-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-1-3','task-1')"></div>
+          <span class="subtask-text">Create <code>.env.example</code> with <code>FRED_API_KEY=your_fred_api_key_here</code> placeholder</span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+        <div class="subtask" id="sub-task-1-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-1-4','task-1')"></div>
+          <span class="subtask-text">Create directory tree: <code>src/</code>, <code>data/cache/</code>, <code>scripts/</code>, <code>tests/</code> + empty <code>__init__.py</code> files</span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 2 -->
+    <div class="task-card" id="task-2">
+      <div class="task-header" onclick="toggleTask('task-2')">
+        <span class="task-num">#02</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-2')"></div>
+        <span class="task-title">config.py — series IDs and metadata registry</span>
+        <span class="task-file">src/config.py</span>
+        <span class="subtask-progress" id="sp-task-2">0/5</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-2-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-2-1','task-2')"></div>
+          <span class="subtask-text">Define <code>FRED_SERIES</code> dict: country → indicator → FRED series ID for USA, Germany, UK, Japan (China = all <code>None</code>)</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-2-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-2-2','task-2')"></div>
+          <span class="subtask-text">Define <code>WORLD_BANK_SERIES</code> (gdp, cpi, unemployment codes) and <code>WORLD_BANK_ISO</code> (country → ISO)</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-2-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-2-3','task-2')"></div>
+          <span class="subtask-text">Define <code>INDICATOR_LABELS</code> (human-readable) and <code>COUNTRY_COLORS</code> (hex per country)</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-2-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-2-4','task-2')"></div>
+          <span class="subtask-text">Define <code>CACHE_DIR</code> (Path relative to project root) and <code>CACHE_MAX_AGE_HOURS = 24</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-2-5">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-2-5','task-2')"></div>
+          <span class="subtask-text">Define <code>ALREADY_RATE_INDICATORS</code> and <code>INDEX_LEVEL_INDICATORS</code> sets to drive YoY logic in the app</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 3 -->
+    <div class="task-card" id="task-3">
+      <div class="task-header" onclick="toggleTask('task-3')">
+        <span class="task-num">#03</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-3')"></div>
+        <span class="task-title">CSV cache utilities in data_fetcher.py</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-3">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-3-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-1','task-3')"></div>
+          <span class="subtask-text">Implement <code>_cache_path(country, indicator) → Path</code>: returns <code>data/cache/usa_gdp.csv</code> style path</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-3-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-2','task-3')"></div>
+          <span class="subtask-text">Implement <code>_cache_is_fresh(path, max_age_hours) → bool</code>: checks file mtime against TTL</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-3-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-3','task-3')"></div>
+          <span class="subtask-text">Implement <code>_save_to_cache(df, path)</code>: creates parent dirs + <code>df.to_csv()</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-3-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-4','task-3')"></div>
+          <span class="subtask-text">Implement <code>_load_from_cache(path) → DataFrame</code>: <code>read_csv</code> with <code>parse_dates=True</code> and DatetimeIndex</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 4 -->
+    <div class="task-card" id="task-4">
+      <div class="task-header" onclick="toggleTask('task-4')">
+        <span class="task-num">#04</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-4')"></div>
+        <span class="task-title">FRED API client in data_fetcher.py</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-4">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-4-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-1','task-4')"></div>
+          <span class="subtask-text">Lazy-initialise module-level <code>_fred_client</code>: loads <code>FRED_API_KEY</code> from <code>.env</code> via python-dotenv; raises clear error if missing</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-4-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-2','task-4')"></div>
+          <span class="subtask-text">Implement <code>fetch_fred_series(series_id, start) → pd.Series</code>: calls <code>fred.get_series()</code>, sets DatetimeIndex, drops NaN</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-4-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-3','task-4')"></div>
+          <span class="subtask-text">Verify with a quick manual test: <code>fetch_fred_series("UNRATE")</code> returns non-empty Series starting from 2000</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 5 -->
+    <div class="task-card" id="task-5">
+      <div class="task-header" onclick="toggleTask('task-5')">
+        <span class="task-num">#05</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-5')"></div>
+        <span class="task-title">World Bank API client in data_fetcher.py</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-5">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-5-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-5-1','task-5')"></div>
+          <span class="subtask-text">Implement <code>fetch_world_bank(country_iso, wb_indicator) → pd.Series</code>: call <code>wbgapi.data.DataFrame</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-5-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-5-2','task-5')"></div>
+          <span class="subtask-text">Convert year-keyed columns to Timestamps (Jan 1 of each year), sort index, drop NaN</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-5-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-5-3','task-5')"></div>
+          <span class="subtask-text">Verify China GDP returns annual Series with reasonable values (5–10% range pre-2020)</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 6 -->
+    <div class="task-card" id="task-6">
+      <div class="task-header" onclick="toggleTask('task-6')">
+        <span class="task-num">#06</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-6')"></div>
+        <span class="task-title">get_indicator() — unified router with caching</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-6">0/5</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-6-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-6-1','task-6')"></div>
+          <span class="subtask-text">Check cache freshness → if fresh, load from CSV and return early (skip API call)</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-6-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-6-2','task-6')"></div>
+          <span class="subtask-text">Route to <code>fetch_fred_series</code> if FRED series ID exists, else route to <code>fetch_world_bank</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-6-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-6-3','task-6')"></div>
+          <span class="subtask-text">Raise <code>ValueError</code> if neither FRED nor World Bank source is available for the indicator</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-6-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-6-4','task-6')"></div>
+          <span class="subtask-text">Call <code>_validate_dataframe()</code> before saving; save to cache; return single-column DataFrame with <code>{country}_{indicator}</code> column name</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-6-5">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-6-5','task-6')"></div>
+          <span class="subtask-text">Support <code>force_refresh=True</code> flag to bypass cache and re-fetch from API</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 7 -->
+    <div class="task-card" id="task-7">
+      <div class="task-header" onclick="toggleTask('task-7')">
+        <span class="task-num">#07</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-7')"></div>
+        <span class="task-title">get_multi_country() — convenience function</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-7">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-7-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-7-1','task-7')"></div>
+          <span class="subtask-text">Loop over countries, call <code>get_indicator()</code> for each, collect DataFrames; warn and skip on any exception</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-7-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-7-2','task-7')"></div>
+          <span class="subtask-text">Concatenate results with <code>pd.concat(..., axis=1, join="outer")</code> to preserve all dates</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-7-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-7-3','task-7')"></div>
+          <span class="subtask-text">Raise <code>ValueError</code> if all countries fail; return wide DataFrame on partial success</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 8 -->
+    <div class="task-card" id="task-8">
+      <div class="task-header" onclick="toggleTask('task-8')">
+        <span class="task-num">#08</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-8')"></div>
+        <span class="task-title">analysis.py — YoY calculation</span>
+        <span class="task-file">src/analysis.py</span>
+        <span class="subtask-progress" id="sp-task-8">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-8-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-8-1','task-8')"></div>
+          <span class="subtask-text">Implement <code>compute_yoy(series, freq="infer") → pd.Series</code> with auto-frequency detection via <code>pd.infer_freq</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-8-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-8-2','task-8')"></div>
+          <span class="subtask-text">Map frequency → shift periods: Monthly → 12, Quarterly → 4, Annual → 1</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-8-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-8-3','task-8')"></div>
+          <span class="subtask-text">Fallback when <code>infer_freq</code> returns None: use median gap between observations</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-8-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-8-4','task-8')"></div>
+          <span class="subtask-text">Return <code>pct_change(periods).mul(100).dropna()</code>; return empty Series if input is too short</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 9 -->
+    <div class="task-card" id="task-9">
+      <div class="task-header" onclick="toggleTask('task-9')">
+        <span class="task-num">#09</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-9')"></div>
+        <span class="task-title">analysis.py — correlations, text insights, resampling</span>
+        <span class="task-file">src/analysis.py</span>
+        <span class="subtask-progress" id="sp-task-9">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-9-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-9-1','task-9')"></div>
+          <span class="subtask-text">Implement <code>compute_correlation(a, b, method="pearson") → float</code>: inner-join alignment, return NaN if &lt;5 observations</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-9-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-9-2','task-9')"></div>
+          <span class="subtask-text">Implement <code>generate_text_insight(series, country, indicator) → str</code>: latest value, 1-year delta direction, 5-year range</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-9-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-9-3','task-9')"></div>
+          <span class="subtask-text">Implement <code>resample_to_common_freq(df, target_freq="QS", method="last") → DataFrame</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-9-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-9-4','task-9')"></div>
+          <span class="subtask-text">Handle edge cases in <code>generate_text_insight</code>: empty series, missing 1-year history, short 5-year window</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /week1 -->
+
+
+  <!-- ─── WEEK 2 ─── -->
+  <div class="week-section w2">
+    <div class="week-label">
+      <span class="week-badge">Week 2</span>
+      <span class="week-title">Streamlit App</span>
+      <div class="week-line"></div>
+    </div>
+
+    <!-- Task 10 -->
+    <div class="task-card" id="task-10">
+      <div class="task-header" onclick="toggleTask('task-10')">
+        <span class="task-num">#10</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-10')"></div>
+        <span class="task-title">app.py — page config and sidebar</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-10">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-10-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-10-1','task-10')"></div>
+          <span class="subtask-text"><code>st.set_page_config(layout="wide", page_icon="📊")</code> as the very first Streamlit call</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-10-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-10-2','task-10')"></div>
+          <span class="subtask-text">Sidebar: country selectbox, indicator selectbox with <code>format_func</code> for human labels, start/end year number inputs</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-10-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-10-3','task-10')"></div>
+          <span class="subtask-text">Sidebar: multiselect for comparison countries (used in Tab 2), with sensible defaults (USA, Germany, Japan)</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-10-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-10-4','task-10')"></div>
+          <span class="subtask-text">Sidebar: "Force Refresh All Data" button — clears session state, deletes CSV cache dir, calls <code>st.rerun()</code></span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 11 -->
+    <div class="task-card" id="task-11">
+      <div class="task-header" onclick="toggleTask('task-11')">
+        <span class="task-num">#11</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-11')"></div>
+        <span class="task-title">Tab layout and session state helper</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-11">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-11-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-11-1','task-11')"></div>
+          <span class="subtask-text">Create three tabs: <code>tab1, tab2, tab3 = st.tabs(["Overview", "Country Comparison", "Correlations"])</code></span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-11-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-11-2','task-11')"></div>
+          <span class="subtask-text">Initialise <code>st.session_state.data_cache = {}</code> on first run to act as in-memory cache across widget interactions</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-11-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-11-3','task-11')"></div>
+          <span class="subtask-text">Implement <code>_load_data(country, indicator, start, force_refresh)</code>: checks session state → calls <code>get_indicator()</code> with spinner → handles errors gracefully</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 12 -->
+    <div class="task-card" id="task-12">
+      <div class="task-header" onclick="toggleTask('task-12')">
+        <span class="task-num">#12</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-12')"></div>
+        <span class="task-title">Tab 1 — time series line chart</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-12">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-12-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-12-1','task-12')"></div>
+          <span class="subtask-text">Load data via <code>_load_data()</code>; apply <code>compute_yoy()</code> for CPI (index-level series), skip for GDP/unemployment/rate</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-12-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-12-2','task-12')"></div>
+          <span class="subtask-text">Filter series to selected start/end year range</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-12-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-12-3','task-12')"></div>
+          <span class="subtask-text">Build Plotly <code>go.Scatter</code> line chart: country colour, <code>hovermode="x unified"</code>, <code>template="plotly_white"</code>, height=450</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-12-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-12-4','task-12')"></div>
+          <span class="subtask-text">Guard for empty result after date filter: show <code>st.warning</code> and <code>st.stop()</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 13 -->
+    <div class="task-card" id="task-13">
+      <div class="task-header" onclick="toggleTask('task-13')">
+        <span class="task-num">#13</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-13')"></div>
+        <span class="task-title">Tab 1 — text insight and summary table</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-13">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-13-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-13-1','task-13')"></div>
+          <span class="subtask-text"><code>st.info(analysis.generate_text_insight(...))</code> displayed below the chart</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-13-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-13-2','task-13')"></div>
+          <span class="subtask-text">Build summary stats table (Latest Value, Mean, Std Dev, Min, Max, Observations) rendered with <code>st.dataframe(hide_index=True)</code></span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-13-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-13-3','task-13')"></div>
+          <span class="subtask-text">Add <code>st.expander("Show raw data")</code> containing the full time series table sorted descending</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 14 -->
+    <div class="task-card" id="task-14">
+      <div class="task-header" onclick="toggleTask('task-14')">
+        <span class="task-num">#14</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-14')"></div>
+        <span class="task-title">Tab 2 — multi-country overlay chart</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-14">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-14-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-14-1','task-14')"></div>
+          <span class="subtask-text">Load each selected country via <code>_load_data()</code>; apply YoY if needed; skip countries that return None</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-14-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-14-2','task-14')"></div>
+          <span class="subtask-text"><code>pd.concat</code> all series into wide DataFrame, then <code>resample_to_common_freq(wide_df, "QS")</code> for clean alignment</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-14-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-14-3','task-14')"></div>
+          <span class="subtask-text">Build Plotly multi-trace line chart: one trace per country with matching colour, legend horizontal above chart</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-14-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-14-4','task-14')"></div>
+          <span class="subtask-text">Filter wide DataFrame to selected date range before rendering</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 15 -->
+    <div class="task-card" id="task-15">
+      <div class="task-header" onclick="toggleTask('task-15')">
+        <span class="task-num">#15</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-15')"></div>
+        <span class="task-title">Tab 2 — cross-country stats table</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-15">0/2</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-15-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-15-1','task-15')"></div>
+          <span class="subtask-text">Per-country: compute Latest, Latest Date, Mean, Std Dev, Min, Max from the date-filtered series</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-15-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-15-2','task-15')"></div>
+          <span class="subtask-text">Render with <code>st.dataframe(use_container_width=True, hide_index=True)</code></span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 16 -->
+    <div class="task-card" id="task-16">
+      <div class="task-header" onclick="toggleTask('task-16')">
+        <span class="task-num">#16</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-16')"></div>
+        <span class="task-title">Tab 3 — correlation selectors and data loading</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-16">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-16-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-16-1','task-16')"></div>
+          <span class="subtask-text">Two-column layout: X-axis (indicator + country selectboxes) and Y-axis (indicator + country selectboxes)</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-16-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-16-2','task-16')"></div>
+          <span class="subtask-text">Load both series via <code>_load_data()</code>, apply YoY if needed, filter to date range</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-16-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-16-3','task-16')"></div>
+          <span class="subtask-text">Inner-join alignment via <code>pd.concat(..., join="inner").dropna()</code>; stop early if &lt;5 aligned observations</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 17 -->
+    <div class="task-card" id="task-17">
+      <div class="task-header" onclick="toggleTask('task-17')">
+        <span class="task-num">#17</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-17')"></div>
+        <span class="task-title">Tab 3 — scatter chart and correlation metrics</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-17">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-17-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-17-1','task-17')"></div>
+          <span class="subtask-text"><code>plotly.express.scatter(..., trendline="ols")</code> with date as hover text (requires statsmodels installed)</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-17-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-17-2','task-17')"></div>
+          <span class="subtask-text">Three <code>st.metric</code> columns: Pearson r (formatted to 3 dp), N observations, relationship direction label</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-17-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-17-3','task-17')"></div>
+          <span class="subtask-text">Determine direction: |r| &lt; 0.2 → "Weak / No relationship", r &gt; 0 → "Positive", r &lt; 0 → "Negative"</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-17-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-17-4','task-17')"></div>
+          <span class="subtask-text">Add <code>st.caption</code> with causation disclaimer</span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 18 -->
+    <div class="task-card" id="task-18">
+      <div class="task-header" onclick="toggleTask('task-18')">
+        <span class="task-num">#18</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-18')"></div>
+        <span class="task-title">Error handling and cache controls</span>
+        <span class="task-file">app.py</span>
+        <span class="subtask-progress" id="sp-task-18">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-18-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-18-1','task-18')"></div>
+          <span class="subtask-text">Wrap each tab body in <code>try/except</code>: show <code>st.error()</code> and "Clear cache and retry" button on failure</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-18-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-18-2','task-18')"></div>
+          <span class="subtask-text">Guard for <code>None</code> FRED series (China interest rate): show <code>st.warning</code> and call <code>st.stop()</code></span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-18-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-18-3','task-18')"></div>
+          <span class="subtask-text">"Force refresh all data" button: clear <code>st.session_state.data_cache</code>, delete CSV cache dir, call <code>st.rerun()</code></span>
+          <span class="subtask-tag tag-ui">ui</span>
+        </div>
+        <div class="subtask" id="sub-task-18-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-18-4','task-18')"></div>
+          <span class="subtask-text">Guard for empty DataFrame after date filtering in all three tabs before attempting chart rendering</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /week2 -->
+
+
+  <!-- ─── WEEK 3 ─── -->
+  <div class="week-section w3">
+    <div class="week-label">
+      <span class="week-badge">Week 3</span>
+      <span class="week-title">Testing, Polish &amp; Documentation</span>
+      <div class="week-line"></div>
+    </div>
+
+    <!-- Task 19 -->
+    <div class="task-card" id="task-19">
+      <div class="task-header" onclick="toggleTask('task-19')">
+        <span class="task-num">#19</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-19')"></div>
+        <span class="task-title">Data validation in data_fetcher.py</span>
+        <span class="task-file">src/data_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-19">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-19-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-19-1','task-19')"></div>
+          <span class="subtask-text">Implement <code>_validate_dataframe(df, country, indicator)</code>: raise <code>ValueError</code> on empty DataFrame</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-19-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-19-2','task-19')"></div>
+          <span class="subtask-text">Convert non-DatetimeIndex to DatetimeIndex automatically</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-19-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-19-3','task-19')"></div>
+          <span class="subtask-text">Issue <code>warnings.warn</code> (not raise) if &gt;50% of values are NaN; call from <code>get_indicator()</code> before cache write</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 20 -->
+    <div class="task-card" id="task-20">
+      <div class="task-header" onclick="toggleTask('task-20')">
+        <span class="task-num">#20</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-20')"></div>
+        <span class="task-title">Unit tests for data_fetcher.py</span>
+        <span class="task-file">tests/test_fetcher.py</span>
+        <span class="subtask-progress" id="sp-task-20">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-20-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-20-1','task-20')"></div>
+          <span class="subtask-text">Test USA/GDP routes to FRED with correct series ID (<code>A191RL1Q225SBEA</code>) using <code>unittest.mock.patch</code></span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-20-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-20-2','task-20')"></div>
+          <span class="subtask-text">Test China/GDP routes to World Bank (FRED series is None)</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-20-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-20-3','task-20')"></div>
+          <span class="subtask-text">Test cache freshness logic: fresh file → True, stale file (mtime 25h ago) → False, missing file → False</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-20-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-20-4','task-20')"></div>
+          <span class="subtask-text">Test <code>get_multi_country</code> skips failed countries with warning and returns partial result</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 21 -->
+    <div class="task-card" id="task-21">
+      <div class="task-header" onclick="toggleTask('task-21')">
+        <span class="task-num">#21</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-21')"></div>
+        <span class="task-title">Unit tests for analysis.py</span>
+        <span class="task-file">tests/test_analysis.py</span>
+        <span class="subtask-progress" id="sp-task-21">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-21-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-21-1','task-21')"></div>
+          <span class="subtask-text"><code>TestComputeYoY</code>: monthly series 100→105 = 5% YoY; empty/short series returns empty Series</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-21-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-21-2','task-21')"></div>
+          <span class="subtask-text"><code>TestComputeCorrelation</code>: perfect positive (r=1.0), insufficient overlap (&lt;5 obs) → NaN</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-21-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-21-3','task-21')"></div>
+          <span class="subtask-text"><code>TestGenerateTextInsight</code>: returns non-empty string containing the country name</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+        <div class="subtask" id="sub-task-21-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-21-4','task-21')"></div>
+          <span class="subtask-text"><code>TestResample</code>: monthly input → quarterly output; verify index frequency and value correctness</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 22 -->
+    <div class="task-card" id="task-22">
+      <div class="task-header" onclick="toggleTask('task-22')">
+        <span class="task-num">#22</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-22')"></div>
+        <span class="task-title">Full README.md</span>
+        <span class="task-file">README.md</span>
+        <span class="subtask-progress" id="sp-task-22">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-22-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-22-1','task-22')"></div>
+          <span class="subtask-text">"What This Shows" section: economics framing — business cycles, monetary policy comparison, Phillips curve exploration</span>
+          <span class="subtask-tag tag-docs">docs</span>
+        </div>
+        <div class="subtask" id="sub-task-22-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-22-2','task-22')"></div>
+          <span class="subtask-text">Setup instructions: clone → pip install → .env → optional prefetch → streamlit run</span>
+          <span class="subtask-tag tag-docs">docs</span>
+        </div>
+        <div class="subtask" id="sub-task-22-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-22-3','task-22')"></div>
+          <span class="subtask-text">Data sources table: all 16 FRED series IDs + World Bank fallback explanation</span>
+          <span class="subtask-tag tag-docs">docs</span>
+        </div>
+        <div class="subtask" id="sub-task-22-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-22-4','task-22')"></div>
+          <span class="subtask-text">"Key Technical Decisions" section: single gateway, CSV cache, YoY at viz time, WB as fallback only, frequency alignment</span>
+          <span class="subtask-tag tag-docs">docs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 23 -->
+    <div class="task-card" id="task-23">
+      <div class="task-header" onclick="toggleTask('task-23')">
+        <span class="task-num">#23</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-23')"></div>
+        <span class="task-title">Verify FRED series IDs for EU/UK/Japan interest rates</span>
+        <span class="task-file">src/config.py</span>
+        <span class="subtask-progress" id="sp-task-23">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-23-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-23-1','task-23')"></div>
+          <span class="subtask-text">Check <code>ECBDFR</code> (ECB Deposit Rate) and <code>BOERUKM</code> (Bank of England Rate) exist on FRED with recent data</span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+        <div class="subtask" id="sub-task-23-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-23-2','task-23')"></div>
+          <span class="subtask-text">Check <code>IRSTCI01JPM156N</code> (Japan policy rate) — if stale or missing, find updated series ID on FRED</span>
+          <span class="subtask-tag tag-config">config</span>
+        </div>
+        <div class="subtask" id="sub-task-23-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-23-3','task-23')"></div>
+          <span class="subtask-text">Add UI-level guard in <code>app.py</code>: if fetched DataFrame is empty for interest_rate, show <code>st.warning</code> instead of crashing</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 24 -->
+    <div class="task-card" id="task-24">
+      <div class="task-header" onclick="toggleTask('task-24')">
+        <span class="task-num">#24</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-24')"></div>
+        <span class="task-title">Frequency resampling integration and visual QA</span>
+        <span class="task-file">src/analysis.py · app.py</span>
+        <span class="subtask-progress" id="sp-task-24">0/3</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-24-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-24-1','task-24')"></div>
+          <span class="subtask-text">Confirm <code>resample_to_common_freq</code> is called in Tab 2 before building the overlay chart</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-24-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-24-2','task-24')"></div>
+          <span class="subtask-text">Confirm alignment is applied in Tab 3 correlation scatter when X and Y series have different native frequencies</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-24-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-24-3','task-24')"></div>
+          <span class="subtask-text">Visual QA: quarterly GDP + monthly CPI overlay renders cleanly without jagged artefacts on the same axis</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task 25 -->
+    <div class="task-card" id="task-25">
+      <div class="task-header" onclick="toggleTask('task-25')">
+        <span class="task-num">#25</span>
+        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-25')"></div>
+        <span class="task-title">Demo prefetch script and final integration test</span>
+        <span class="task-file">scripts/prefetch_data.py</span>
+        <span class="subtask-progress" id="sp-task-25">0/4</span>
+        <span class="chevron">›</span>
+      </div>
+      <div class="subtasks">
+        <div class="subtask" id="sub-task-25-1">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-25-1','task-25')"></div>
+          <span class="subtask-text">Loop over all 5 countries × 4 indicators = 20 combinations; call <code>get_indicator(force_refresh=True)</code> for each</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-25-2">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-25-2','task-25')"></div>
+          <span class="subtask-text">Print <code>[OK] {country}/{indicator} — {n} rows</code> or <code>[FAIL] {country}/{indicator} — {error}</code> per combination</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-25-3">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-25-3','task-25')"></div>
+          <span class="subtask-text">Print summary: total OK / total combinations; exit with code 1 if any unexpected failures</span>
+          <span class="subtask-tag tag-code">code</span>
+        </div>
+        <div class="subtask" id="sub-task-25-4">
+          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-25-4','task-25')"></div>
+          <span class="subtask-text">Run full verification checklist: prefetch → all 3 tabs render → force refresh → pytest all green</span>
+          <span class="subtask-tag tag-test">test</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /week3 -->
+
+</div><!-- /container -->
+
+<script>
+  // State stored in localStorage
+  const STORAGE_KEY = 'macro-dashboard-plan';
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch { return {}; }
+  }
+
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  let state = loadState();
+
+  function toggleTask(taskId) {
+    const card = document.getElementById(taskId);
+    card.classList.toggle('open');
+  }
+
+  function toggleTaskDone(e, taskId) {
+    e.stopPropagation();
+    const card = document.getElementById(taskId);
+    const cb = card.querySelector('.task-checkbox');
+    const isDone = card.classList.toggle('done');
+    cb.classList.toggle('checked', isDone);
+    if (!state[taskId]) state[taskId] = {};
+    state[taskId].done = isDone;
+    saveState(state);
+    updateProgress();
+  }
+
+  function toggleSub(e, subId, taskId) {
+    e.stopPropagation();
+    const sub = document.getElementById(subId);
+    const cb = sub.querySelector('.subtask-checkbox');
+    const isDone = sub.classList.toggle('done');
+    cb.classList.toggle('checked', isDone);
+    if (!state[taskId]) state[taskId] = {};
+    if (!state[taskId].subs) state[taskId].subs = {};
+    state[taskId].subs[subId] = isDone;
+    saveState(state);
+    updateSubtaskProgress(taskId);
+    updateProgress();
+  }
+
+  function updateSubtaskProgress(taskId) {
+    const card = document.getElementById(taskId);
+    const allSubs = card.querySelectorAll('.subtask');
+    const doneSubs = card.querySelectorAll('.subtask.done');
+    const sp = document.getElementById('sp-' + taskId);
+    if (sp) sp.textContent = doneSubs.length + '/' + allSubs.length;
+  }
+
+  function updateProgress() {
+    const allTasks = document.querySelectorAll('.task-card');
+    const doneTasks = document.querySelectorAll('.task-card.done');
+    const allSubs = document.querySelectorAll('.subtask');
+    const doneSubs = document.querySelectorAll('.subtask.done');
+
+    const pct = allTasks.length ? Math.round(doneTasks.length / allTasks.length * 100) : 0;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = doneTasks.length + ' / ' + allTasks.length + ' tasks';
+    document.getElementById('stat-done').textContent = doneTasks.length;
+    document.getElementById('stat-sub-done').textContent = doneSubs.length;
+  }
+
+  // Restore state on load
+  function restoreState() {
+    for (const [taskId, taskState] of Object.entries(state)) {
+      const card = document.getElementById(taskId);
+      if (!card) continue;
+
+      if (taskState.done) {
+        card.classList.add('done');
+        card.querySelector('.task-checkbox').classList.add('checked');
+      }
+
+      if (taskState.subs) {
+        for (const [subId, subDone] of Object.entries(taskState.subs)) {
+          if (!subDone) continue;
+          const sub = document.getElementById(subId);
+          if (!sub) continue;
+          sub.classList.add('done');
+          sub.querySelector('.subtask-checkbox').classList.add('checked');
+        }
+      }
+
+      updateSubtaskProgress(taskId);
+    }
+    updateProgress();
+  }
+
+  restoreState();
+</script>
+</body>
+</html>
