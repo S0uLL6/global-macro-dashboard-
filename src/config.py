@@ -50,3 +50,20 @@ WORLD_BANK_ISO = {
     "Japan": "JP",
     "China": "CN",
 }
+
+# Human-readable labels shown in the UI
+INDICATOR_LABELS = {
+    "gdp": "GDP Growth (%)",
+    "cpi": "CPI Inflation",
+    "unemployment": "Unemployment Rate (%)",
+    "interest_rate": "Central Bank Rate (%)",
+}
+
+# Consistent hex colours per country across all charts
+COUNTRY_COLORS = {
+    "USA": "#1f77b4",
+    "Germany": "#d62728",
+    "UK": "#2ca02c",
+    "Japan": "#ff7f0e",
+    "China": "#9467bd",
+}
