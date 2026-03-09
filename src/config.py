@@ -33,3 +33,20 @@ FRED_SERIES = {
         "interest_rate": None,
     },
 }
+
+# World Bank indicator codes (fallback for China and missing FRED series)
+WORLD_BANK_SERIES = {
+    "gdp": "NY.GDP.MKTP.KD.ZG",
+    "cpi": "FP.CPI.TOTL.ZG",
+    "unemployment": "SL.UEM.TOTL.ZS",
+    "interest_rate": None,  # Not available from World Bank
+}
+
+# World Bank ISO 2-letter country codes
+WORLD_BANK_ISO = {
+    "USA": "US",
+    "Germany": "DE",
+    "UK": "GB",
+    "Japan": "JP",
+    "China": "CN",
+}
