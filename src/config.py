@@ -1,5 +1,9 @@
 from pathlib import Path
 
+# Cache configuration
+CACHE_DIR = Path(__file__).parent.parent / "data" / "cache"
+CACHE_MAX_AGE_HOURS = 24
+
 # FRED series IDs: country -> indicator -> series_id (None = World Bank only)
 FRED_SERIES = {
     "USA": {
