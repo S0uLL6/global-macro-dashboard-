@@ -394,13 +394,13 @@
     </div>
 
     <!-- Task 1 -->
-    <div class="task-card" id="task-1">
+    <div class="task-card done" id="task-1">
       <div class="task-header" onclick="toggleTask('task-1')">
         <span class="task-num">#01</span>
-        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-1')"></div>
+        <div class="task-checkbox checked" onclick="toggleTaskDone(event,'task-1')"></div>
         <span class="task-title">Project skeleton — scaffolding &amp; boilerplate</span>
         <span class="task-file">root/</span>
-        <span class="subtask-progress" id="sp-task-1">3/4</span>
+        <span class="subtask-progress" id="sp-task-1">4/4</span>
         <span class="chevron">›</span>
       </div>
       <div class="subtasks">
@@ -419,8 +419,8 @@
           <span class="subtask-text">Create <code>.env.example</code> with <code>FRED_API_KEY=your_fred_api_key_here</code> placeholder</span>
           <span class="subtask-tag tag-config">config</span>
         </div>
-        <div class="subtask" id="sub-task-1-4">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-1-4','task-1')"></div>
+        <div class="subtask done" id="sub-task-1-4">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-1-4','task-1')"></div>
           <span class="subtask-text">Create directory tree: <code>src/</code>, <code>data/cache/</code>, <code>scripts/</code>, <code>tests/</code> + empty <code>__init__.py</code> files</span>
           <span class="subtask-tag tag-config">config</span>
         </div>
