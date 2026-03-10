@@ -467,33 +467,33 @@
     </div>
 
     <!-- Task 3 -->
-    <div class="task-card" id="task-3">
+    <div class="task-card done" id="task-3">
       <div class="task-header" onclick="toggleTask('task-3')">
         <span class="task-num">#03</span>
-        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-3')"></div>
+        <div class="task-checkbox checked" onclick="toggleTaskDone(event,'task-3')"></div>
         <span class="task-title">CSV cache utilities in data_fetcher.py</span>
         <span class="task-file">src/data_fetcher.py</span>
-        <span class="subtask-progress" id="sp-task-3">0/4</span>
+        <span class="subtask-progress" id="sp-task-3">4/4</span>
         <span class="chevron">›</span>
       </div>
       <div class="subtasks">
-        <div class="subtask" id="sub-task-3-1">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-1','task-3')"></div>
+        <div class="subtask done" id="sub-task-3-1">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-3-1','task-3')"></div>
           <span class="subtask-text">Implement <code>_cache_path(country, indicator) → Path</code>: returns <code>data/cache/usa_gdp.csv</code> style path</span>
           <span class="subtask-tag tag-code">code</span>
         </div>
-        <div class="subtask" id="sub-task-3-2">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-2','task-3')"></div>
+        <div class="subtask done" id="sub-task-3-2">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-3-2','task-3')"></div>
           <span class="subtask-text">Implement <code>_cache_is_fresh(path, max_age_hours) → bool</code>: checks file mtime against TTL</span>
           <span class="subtask-tag tag-code">code</span>
         </div>
-        <div class="subtask" id="sub-task-3-3">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-3','task-3')"></div>
+        <div class="subtask done" id="sub-task-3-3">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-3-3','task-3')"></div>
           <span class="subtask-text">Implement <code>_save_to_cache(df, path)</code>: creates parent dirs + <code>df.to_csv()</code></span>
           <span class="subtask-tag tag-code">code</span>
         </div>
-        <div class="subtask" id="sub-task-3-4">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-3-4','task-3')"></div>
+        <div class="subtask done" id="sub-task-3-4">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-3-4','task-3')"></div>
           <span class="subtask-text">Implement <code>_load_from_cache(path) → DataFrame</code>: <code>read_csv</code> with <code>parse_dates=True</code> and DatetimeIndex</span>
           <span class="subtask-tag tag-code">code</span>
         </div>
@@ -501,28 +501,28 @@
     </div>
 
     <!-- Task 4 -->
-    <div class="task-card" id="task-4">
+    <div class="task-card done" id="task-4">
       <div class="task-header" onclick="toggleTask('task-4')">
         <span class="task-num">#04</span>
-        <div class="task-checkbox" onclick="toggleTaskDone(event,'task-4')"></div>
+        <div class="task-checkbox checked" onclick="toggleTaskDone(event,'task-4')"></div>
         <span class="task-title">FRED API client in data_fetcher.py</span>
         <span class="task-file">src/data_fetcher.py</span>
-        <span class="subtask-progress" id="sp-task-4">0/3</span>
+        <span class="subtask-progress" id="sp-task-4">3/3</span>
         <span class="chevron">›</span>
       </div>
       <div class="subtasks">
-        <div class="subtask" id="sub-task-4-1">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-1','task-4')"></div>
+        <div class="subtask done" id="sub-task-4-1">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-4-1','task-4')"></div>
           <span class="subtask-text">Lazy-initialise module-level <code>_fred_client</code>: loads <code>FRED_API_KEY</code> from <code>.env</code> via python-dotenv; raises clear error if missing</span>
           <span class="subtask-tag tag-code">code</span>
         </div>
-        <div class="subtask" id="sub-task-4-2">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-2','task-4')"></div>
+        <div class="subtask done" id="sub-task-4-2">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-4-2','task-4')"></div>
           <span class="subtask-text">Implement <code>fetch_fred_series(series_id, start) → pd.Series</code>: calls <code>fred.get_series()</code>, sets DatetimeIndex, drops NaN</span>
           <span class="subtask-tag tag-code">code</span>
         </div>
-        <div class="subtask" id="sub-task-4-3">
-          <div class="subtask-checkbox" onclick="toggleSub(event,'sub-task-4-3','task-4')"></div>
+        <div class="subtask done" id="sub-task-4-3">
+          <div class="subtask-checkbox checked" onclick="toggleSub(event,'sub-task-4-3','task-4')"></div>
           <span class="subtask-text">Verify with a quick manual test: <code>fetch_fred_series("UNRATE")</code> returns non-empty Series starting from 2000</span>
           <span class="subtask-tag tag-test">test</span>
         </div>
