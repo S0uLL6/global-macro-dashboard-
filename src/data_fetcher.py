@@ -24,3 +24,10 @@ def _save_to_cache(df: pd.DataFrame, path: Path) -> None:
     """Create parent dirs and save DataFrame to CSV."""
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path)
+
+
+def _load_from_cache(path: Path) -> pd.DataFrame:
+    """Load CSV from cache with DatetimeIndex."""
+    df = pd.read_csv(path, index_col=0, parse_dates=True)
+    df.index = pd.DatetimeIndex(df.index)
+    return df
