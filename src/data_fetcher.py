@@ -49,3 +49,12 @@ def _load_from_cache(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, index_col=0, parse_dates=True)
     df.index = pd.DatetimeIndex(df.index)
     return df
+
+
+def fetch_fred_series(series_id: str, start: str = "2000-01-01") -> pd.Series:
+    """Fetch a FRED series, return as a named Series with DatetimeIndex, NaN dropped."""
+    fred = _get_fred_client()
+    data = fred.get_series(series_id, observation_start=start)
+    data.index = pd.DatetimeIndex(data.index)
+    data.name = series_id
+    return data.dropna()
