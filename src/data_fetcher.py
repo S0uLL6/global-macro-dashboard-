@@ -1,12 +1,21 @@
 import os
 import time
+import warnings
 from pathlib import Path
 
 import pandas as pd
+import wbgapi
 from dotenv import load_dotenv
 from fredapi import Fred
 
-from src.config import CACHE_DIR
+from src.config import (
+    CACHE_DIR,
+    CACHE_MAX_AGE_HOURS,
+    COUNTRIES,
+    FRED_SERIES,
+    WORLD_BANK_ISO,
+    WORLD_BANK_SERIES,
+)
 
 _fred_client: "Fred | None" = None
 
@@ -58,3 +67,97 @@ def fetch_fred_series(series_id: str, start: str = "2000-01-01") -> pd.Series:
     data.index = pd.DatetimeIndex(data.index)
     data.name = series_id
     return data.dropna()
+
+
+def fetch_world_bank(country_iso: str, wb_indicator: str) -> pd.Series:
+    """Fetch a World Bank indicator for one country.
+
+    Returns a pd.Series with DatetimeIndex (Jan 1 of each year), sorted, NaN dropped.
+    """
+    df = wbgapi.data.DataFrame(wb_indicator, economy=country_iso)
+    # df columns are year strings like "YR2020"; rows are economies
+    row = df.loc[country_iso] if country_iso in df.index else df.iloc[0]
+    # Convert year labels "YR2020" → Timestamp("2020-01-01")
+    index = pd.to_datetime(
+        [str(col).replace("YR", "") for col in row.index], format="%Y"
+    )
+    series = pd.Series(row.values, index=index, name=wb_indicator, dtype=float)
+    series = series.sort_index().dropna()
+    return series
+
+
+def _validate_dataframe(df: pd.DataFrame, country: str, indicator: str) -> pd.DataFrame:
+    """Validate fetched DataFrame; raise on empty, warn on >50% NaN, ensure DatetimeIndex."""
+    if df.empty:
+        raise ValueError(f"Empty DataFrame returned for {country}/{indicator}")
+    if not isinstance(df.index, pd.DatetimeIndex):
+        df.index = pd.DatetimeIndex(df.index)
+    nan_ratio = df.iloc[:, 0].isna().mean()
+    if nan_ratio > 0.5:
+        warnings.warn(
+            f"{country}/{indicator}: {nan_ratio:.0%} of values are NaN",
+            UserWarning,
+            stacklevel=3,
+        )
+    return df
+
+
+def get_indicator(
+    country: str,
+    indicator: str,
+    start: str = "2000-01-01",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Unified router: return single-column DataFrame for country/indicator.
+
+    Checks CSV cache first (unless force_refresh=True). Routes to FRED or
+    World Bank depending on config. Saves result to cache.
+    """
+    path = _cache_path(country, indicator)
+
+    if not force_refresh and _cache_is_fresh(path, CACHE_MAX_AGE_HOURS):
+        return _load_from_cache(path)
+
+    fred_id = FRED_SERIES.get(country, {}).get(indicator)
+    wb_code = WORLD_BANK_SERIES.get(indicator)
+    iso = WORLD_BANK_ISO.get(country)
+
+    if fred_id is not None:
+        series = fetch_fred_series(fred_id, start=start)
+    elif wb_code is not None and iso is not None:
+        series = fetch_world_bank(iso, wb_code)
+    else:
+        raise ValueError(
+            f"No data source available for {country}/{indicator}. "
+            "Neither FRED series ID nor World Bank code is configured."
+        )
+
+    col_name = f"{country}_{indicator}"
+    df = series.to_frame(name=col_name)
+    df = _validate_dataframe(df, country, indicator)
+    _save_to_cache(df, path)
+    return df
+
+
+def get_multi_country(
+    countries: list,
+    indicator: str,
+    start: str = "2000-01-01",
+    force_refresh: bool = False,
+) -> pd.DataFrame:
+    """Fetch indicator for multiple countries; return wide DataFrame.
+
+    Skips countries that fail with a warning. Raises ValueError if all fail.
+    """
+    frames = []
+    for country in countries:
+        try:
+            df = get_indicator(country, indicator, start=start, force_refresh=force_refresh)
+            frames.append(df)
+        except Exception as exc:
+            warnings.warn(f"Skipping {country}/{indicator}: {exc}", UserWarning, stacklevel=2)
+
+    if not frames:
+        raise ValueError(f"All countries failed for indicator '{indicator}'")
+
+    return pd.concat(frames, axis=1, join="outer")
