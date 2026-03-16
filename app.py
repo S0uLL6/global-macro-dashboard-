@@ -11,6 +11,7 @@ from src.config import (
     ALREADY_RATE_INDICATORS,
     COUNTRIES,
     COUNTRY_COLORS,
+    GDP_LEVEL_COUNTRIES,
     INDEX_LEVEL_INDICATORS,
     INDICATOR_LABELS,
     INDICATORS,
@@ -81,10 +82,13 @@ def _load_data(
         return None
 
 
-def _apply_yoy(df: pd.DataFrame, indicator: str) -> pd.Series:
-    """Apply YoY transformation for index-level indicators (e.g. CPI)."""
+def _apply_yoy(df: pd.DataFrame, indicator: str, country: str = "") -> pd.Series:
+    """Apply YoY transformation for index-level indicators (CPI) and
+    GDP series that are stored as absolute levels (Germany, UK, Japan, China)."""
     series = df.iloc[:, 0]
     if indicator in INDEX_LEVEL_INDICATORS:
+        return analysis.compute_yoy(series)
+    if indicator == "gdp" and country in GDP_LEVEL_COUNTRIES:
         return analysis.compute_yoy(series)
     return series
 
@@ -113,7 +117,7 @@ with tab1:
         if df is None:
             st.stop()
 
-        series = _apply_yoy(df, selected_indicator)
+        series = _apply_yoy(df, selected_indicator, selected_country)
         series = _filter_date(series)
 
         if series.empty:
@@ -199,7 +203,7 @@ with tab2:
                 continue
             df = _load_data(country, selected_indicator)
             if df is not None:
-                s = _apply_yoy(df, selected_indicator)
+                s = _apply_yoy(df, selected_indicator, country)
                 if not s.empty:
                     series_dict[country] = s
 
@@ -300,8 +304,8 @@ with tab3:
         if df_x is None or df_y is None:
             st.stop()
 
-        sx = _apply_yoy(df_x, x_indicator)
-        sy = _apply_yoy(df_y, y_indicator)
+        sx = _apply_yoy(df_x, x_indicator, x_country)
+        sy = _apply_yoy(df_y, y_indicator, y_country)
         sx = _filter_date(sx)
         sy = _filter_date(sy)
 
@@ -322,19 +326,33 @@ with tab3:
         scatter_df.columns = ["date", "x", "y"]
         scatter_df["date_str"] = scatter_df["date"].dt.strftime("%b %Y")
 
-        fig3 = px.scatter(
-            scatter_df,
-            x="x",
-            y="y",
-            hover_data={"date_str": True, "x": ":.2f", "y": ":.2f", "date": False},
-            trendline="ols",
-            labels={
-                "x": f"{x_country} {INDICATOR_LABELS[x_indicator]}",
-                "y": f"{y_country} {INDICATOR_LABELS[y_indicator]}",
-            },
-            template="plotly_white",
-            height=450,
-        )
+        try:
+            fig3 = px.scatter(
+                scatter_df,
+                x="x",
+                y="y",
+                hover_data={"date_str": True, "x": ":.2f", "y": ":.2f", "date": False},
+                trendline="ols",
+                labels={
+                    "x": f"{x_country} {INDICATOR_LABELS[x_indicator]}",
+                    "y": f"{y_country} {INDICATOR_LABELS[y_indicator]}",
+                },
+                template="plotly_white",
+                height=450,
+            )
+        except Exception:
+            fig3 = px.scatter(
+                scatter_df,
+                x="x",
+                y="y",
+                hover_data={"date_str": True, "x": ":.2f", "y": ":.2f", "date": False},
+                labels={
+                    "x": f"{x_country} {INDICATOR_LABELS[x_indicator]}",
+                    "y": f"{y_country} {INDICATOR_LABELS[y_indicator]}",
+                },
+                template="plotly_white",
+                height=450,
+            )
         st.plotly_chart(fig3, use_container_width=True)
 
         # ── correlation metrics ───────────────────────────────────

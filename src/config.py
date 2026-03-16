@@ -78,6 +78,10 @@ ALREADY_RATE_INDICATORS = {"gdp", "unemployment", "interest_rate"}
 # Indicators where FRED series is an index level (YoY % change needed)
 INDEX_LEVEL_INDICATORS = {"cpi"}
 
+# Countries whose GDP FRED series is an absolute level (not % change) → need YoY
+# USA uses A191RL1Q225SBEA which is already QoQ %; others use volume level series
+GDP_LEVEL_COUNTRIES = {"Germany", "UK", "Japan", "China"}
+
 # Convenience lists for iteration
 COUNTRIES = list(FRED_SERIES.keys())
 INDICATORS = list(INDICATOR_LABELS.keys())
